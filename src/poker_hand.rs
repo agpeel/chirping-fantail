@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum PokerHandRank {
     HighCard,
     Pair,
@@ -11,6 +11,22 @@ pub enum PokerHandRank {
     FullHouse,
     FourOfAKind,
     StraightFlush,
+}
+
+impl From<PokerHandRank> for u8 {
+    fn from(rank: PokerHandRank) -> Self {
+        match rank {
+            PokerHandRank::HighCard => 1,
+            PokerHandRank::Pair => 2,
+            PokerHandRank::TwoPair => 3,
+            PokerHandRank::ThreeOfAKind => 4,
+            PokerHandRank::Straight => 5,
+            PokerHandRank::Flush => 6,
+            PokerHandRank::FullHouse => 7,
+            PokerHandRank::FourOfAKind => 8,
+            PokerHandRank::StraightFlush => 9,
+        }
+    }
 }
 
 // Record a reference to the input string slice and derived information about the hand.
@@ -39,18 +55,26 @@ pub fn build_poker_hand_handle(hand: &str) -> Result<PokerHandHandle, &'static s
 
 impl PartialEq for PokerHandHandle<'_> {
     fn eq(&self, other: &Self) -> bool {
-        // TODO: Compare the hand rank, not the original string.
-        *self.hand_handle == *other.hand_handle
+        self.hand_rank == other.hand_rank && self.card_ranks == other.card_ranks
     }
 }
 
 impl PartialOrd for PokerHandHandle<'_> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        // TODO: Compare the hand rank, not the original string.
-        if *self.hand_handle == *other.hand_handle {
-            Some(Ordering::Equal)
-        } else {
+        if u8::from(self.hand_rank) < u8::from(other.hand_rank) {
+            Some(Ordering::Less)
+        } else if u8::from(self.hand_rank) > u8::from(other.hand_rank) {
             Some(Ordering::Greater)
+        } else {
+            // Compare the card ranks.
+            for i in 0..5 {
+                if self.card_ranks[i] < other.card_ranks[i] {
+                    return Some(Ordering::Less);
+                } else if self.card_ranks[i] > other.card_ranks[i] {
+                    return Some(Ordering::Greater);
+                }
+            }
+            Some(Ordering::Equal)
         }
     }
 }
