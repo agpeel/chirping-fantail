@@ -41,7 +41,6 @@ fn test_invalid_hands() {
 }
 
 #[test]
-#[ignore]
 fn test_highest_card_of_all_hands_wins() {
     test(
         &["4D 5S 6S 8D 3C", "2S 4C 7S 9H 10H", "3S 4S 5D 6H JH"],
@@ -64,7 +63,6 @@ fn test_a_tie_has_multiple_winners() {
 }
 
 #[test]
-#[ignore]
 fn test_high_card_can_be_low_card_in_an_otherwise_tie() {
     // multiple hands with the same high cards, tie compares next highest ranked,
     // down to last card
@@ -134,13 +132,11 @@ fn test_three_of_a_kind_cascade_ranks() {
 }
 
 #[test]
-#[ignore]
 fn test_straight_beats_three_of_a_kind() {
     test(&["4S 5H 4C 8D 4H", "3S 4D 2S 6D 5C"], &["3S 4D 2S 6D 5C"])
 }
 
 #[test]
-#[ignore]
 fn test_aces_can_end_a_straight_high() {
     // aces can end a straight (10 J Q K A)
     test(&["4S 5H 4C 8D 4H", "10D JH QS KD AC"], &["10D JH QS KD AC"])
@@ -154,7 +150,6 @@ fn test_aces_can_end_a_straight_low() {
 }
 
 #[test]
-#[ignore]
 fn test_straight_cascade() {
     // both hands with a straight, tie goes to highest ranked card
     test(&["4S 6C 7S 8D 5H", "5S 7H 8S 9D 6H"], &["5S 7H 8S 9D 6H"])
@@ -168,13 +163,11 @@ fn test_straight_scoring() {
 }
 
 #[test]
-#[ignore]
 fn test_flush_beats_a_straight() {
     test(&["4C 6H 7D 8D 5H", "2S 4S 5S 6S 7S"], &["2S 4S 5S 6S 7S"])
 }
 
 #[test]
-#[ignore]
 fn test_flush_cascade() {
     // both hands have a flush, tie goes to high card, down to the last one if necessary
     test(&["4H 7H 8H 9H 6H", "2S 4S 5S 6S 7S"], &["4H 7H 8H 9H 6H"])
@@ -221,13 +214,11 @@ fn test_four_of_a_kind_cascade() {
 }
 
 #[test]
-#[ignore]
 fn test_straight_flush_beats_four_of_a_kind() {
     test(&["4S 5H 5S 5D 5C", "7S 8S 9S 6S 10S"], &["7S 8S 9S 6S 10S"])
 }
 
 #[test]
-#[ignore]
 fn test_straight_flush_ranks() {
     // both hands have straight flush, tie goes to highest-ranked card
     test(&["4H 6H 7H 8H 5H", "5S 7S 8S 9S 6S"], &["5S 7S 8S 9S 6S"])

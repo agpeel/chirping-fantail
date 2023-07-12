@@ -43,7 +43,6 @@ pub struct PokerHandHandle<'a> {
 pub fn build_poker_hand_handle(hand: &str) -> Result<PokerHandHandle, &'static str> {
     let mut card_ranks: Vec<u8> = Vec::with_capacity(5);
     let mut card_suits: Vec<char> = Vec::with_capacity(5);
-    let mut hand_rank: PokerHandRank = PokerHandRank::HighCard;
 
     // Parse the hand string.
     let mut expect_num: bool = true;
@@ -87,7 +86,31 @@ pub fn build_poker_hand_handle(hand: &str) -> Result<PokerHandHandle, &'static s
         return Err("Too few cards in hand");
     }
 
-    // TODO: Classify the hand.
+    // Classify the hand.
+    let mut hand_rank: PokerHandRank = PokerHandRank::HighCard;
+    // Is it a flush?
+    // This changes card_suits, which is OK as it is no longer used.
+    card_suits.dedup();
+    if card_suits.len() == 1 {
+        hand_rank = PokerHandRank::Flush;
+    }
+    // Sort the card ranks from highest to lowest.
+    card_ranks.sort();
+    card_ranks.reverse();
+    // Check for a straight.
+    if card_ranks[0] == card_ranks[1] + 1
+        && card_ranks[0] == card_ranks[2] + 2
+        && card_ranks[0] == card_ranks[3] + 3
+        && card_ranks[0] == card_ranks[4] + 4
+    {
+        if hand_rank == PokerHandRank::Flush {
+            hand_rank = PokerHandRank::StraightFlush;
+        } else {
+            hand_rank = PokerHandRank::Straight;
+        }
+    }
+
+    // TODO: Check for pairs, three of a kind, etc.
 
     Ok(PokerHandHandle {
         hand_handle: hand,
