@@ -22,9 +22,21 @@ pub fn winning_hands<'a>(hands: &[&'a str]) -> Option<Vec<&'a str>> {
     hand_handles.sort_by(|a, b| a.partial_cmp(b).unwrap());
     hand_handles.reverse(); // Highest hand first.
 
-    // TODO: Check for multiple winning hands.
     match hand_handles.len() {
         0 => None,
-        _ => Some(vec![hand_handles[0].hand_handle]),
+        1 => Some(vec![hand_handles[0].hand_handle]),
+        _ => {
+            let mut top_hands = vec![hand_handles[0].hand_handle];
+            for i in 1..hand_handles.len() {
+                if hand_handles[i] == hand_handles[0] {
+                    top_hands.push(hand_handles[i].hand_handle);
+                } else {
+                    break;
+                }
+            }
+            // Return an immutable vector of references to the winning hands.
+            let return_val = top_hands.clone();
+            Some(return_val)
+        }
     }
 }
