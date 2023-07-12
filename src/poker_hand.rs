@@ -121,6 +121,15 @@ pub fn build_poker_hand_handle(hand: &str) -> Result<PokerHandHandle, &'static s
             card_ranks[3] = 2;
             card_ranks[4] = 14;
         }
+    } 
+    // Check for four of a kind.
+    else if card_ranks[0] == card_ranks[1] && card_ranks[0] == card_ranks[2] && card_ranks[0] == card_ranks[3] {
+        hand_rank = PokerHandRank::FourOfAKind;
+    } else if card_ranks[1] == card_ranks[2] && card_ranks[1] == card_ranks[3] && card_ranks[1] == card_ranks[4] {
+        hand_rank = PokerHandRank::FourOfAKind;
+        // Re-order the card_ranks to put the four of a kind first.
+        card_ranks[4] = card_ranks[0];
+        card_ranks[0] = card_ranks[1];
     }
 
     // TODO: Check for pairs, three of a kind, etc.

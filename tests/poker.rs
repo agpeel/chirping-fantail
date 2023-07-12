@@ -197,14 +197,12 @@ fn test_four_of_a_kind_beats_full_house() {
 }
 
 #[test]
-#[ignore]
 fn test_four_of_a_kind_ranks() {
     // both hands have four of a kind, tie goes to high quad
     test(&["2S 2H 2C 8D 2D", "4S 5H 5S 5D 5C"], &["4S 5H 5S 5D 5C"])
 }
 
 #[test]
-#[ignore]
 fn test_four_of_a_kind_cascade() {
     // with multiple decks, both hands with identical four of a kind, tie determined by kicker
     test(&["3S 3H 2S 3D 3C", "3S 3H 4S 3D 3C"], &["3S 3H 4S 3D 3C"])
