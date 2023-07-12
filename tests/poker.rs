@@ -27,6 +27,20 @@ fn test_single_hand_always_wins() {
 }
 
 #[test]
+fn test_invalid_hands() {
+    test(
+        &[
+            "4D 5S 6S 8D 3C JH",
+            "2S 4C 7S 10H",
+            "4S 2H 7D 10X AD",
+            "4S bH 7D 10C AD",
+            "3S 4S 5D 6H JH",
+        ],
+        &["3S 4S 5D 6H JH"],
+    )
+}
+
+#[test]
 #[ignore]
 fn test_highest_card_of_all_hands_wins() {
     test(
