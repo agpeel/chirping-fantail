@@ -116,14 +116,12 @@ fn test_three_of_a_kind_beats_two_pair() {
 }
 
 #[test]
-#[ignore]
 fn test_three_of_a_kind_ranks() {
     //both hands have three of a kind, tie goes to highest ranked triplet
     test(&["2S 2H 2C 8D JH", "4S AH AS 8C AD"], &["4S AH AS 8C AD"])
 }
 
 #[test]
-#[ignore]
 fn test_three_of_a_kind_cascade_ranks() {
     // with multiple decks, two players can have same three of a kind,
     // ties go to highest remaining cards
@@ -171,27 +169,23 @@ fn test_flush_cascade() {
 }
 
 #[test]
-#[ignore]
 fn test_full_house_beats_a_flush() {
     test(&["3H 6H 7H 8H 5H", "4S 5C 4C 5D 4H"], &["4S 5C 4C 5D 4H"])
 }
 
 #[test]
-#[ignore]
 fn test_full_house_ranks() {
     // both hands have a full house, tie goes to highest-ranked triplet
     test(&["4H 4S 4D 9S 9D", "5H 5S 5D 8S 8D"], &["5H 5S 5D 8S 8D"])
 }
 
 #[test]
-#[ignore]
 fn test_full_house_cascade() {
     // with multiple decks, both hands have a full house with the same triplet, tie goes to the pair
     test(&["5H 5S 5D 9S 9D", "5H 5S 5D 8S 8D"], &["5H 5S 5D 9S 9D"])
 }
 
 #[test]
-#[ignore]
 fn test_four_of_a_kind_beats_full_house() {
     test(&["4S 5H 4D 5D 4H", "3S 3H 2S 3D 3C"], &["3S 3H 2S 3D 3C"])
 }

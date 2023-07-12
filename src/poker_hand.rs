@@ -131,6 +131,28 @@ pub fn build_poker_hand_handle(hand: &str) -> Result<PokerHandHandle, &'static s
         card_ranks[4] = card_ranks[0];
         card_ranks[0] = card_ranks[1];
     }
+    // Check for three of a kind and full house.
+    else if card_ranks[0] == card_ranks[1] && card_ranks[0] == card_ranks[2] {
+        if card_ranks[3] == card_ranks[4] {
+            hand_rank = PokerHandRank::FullHouse;
+        } else {
+            hand_rank = PokerHandRank::ThreeOfAKind;
+        }
+    } else if card_ranks[1] == card_ranks[2] && card_ranks[1] == card_ranks[3] {
+        hand_rank = PokerHandRank::ThreeOfAKind;
+        card_ranks[3] = card_ranks[0];
+        card_ranks[0] = card_ranks[1];
+    } else if card_ranks[2] == card_ranks[3] && card_ranks[2] == card_ranks[4] {
+        if card_ranks[0] == card_ranks[1] {
+            hand_rank = PokerHandRank::FullHouse;
+        } else {
+            hand_rank = PokerHandRank::ThreeOfAKind;
+        }
+        card_ranks[4] = card_ranks[1];
+        card_ranks[3] = card_ranks[0];
+        card_ranks[0] = card_ranks[2];
+        card_ranks[1] = card_ranks[2];
+    }
 
     // TODO: Check for pairs, three of a kind, etc.
 
