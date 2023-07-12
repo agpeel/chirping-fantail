@@ -12,6 +12,10 @@ pub fn winning_hands<'a>(hands: &[&'a str]) -> Option<Vec<&'a str>> {
     for hand in hands {
         hand_handles.push(PokerHandHandle { hand_handle: hand });
     }
+
+    hand_handles.sort_by(|a, b| a.partial_cmp(b).unwrap());
+    hand_handles.reverse(); // Highest hand first.
+
     // TODO: return the first hand for now to satisfy the linter.
     Some(vec![hands[0]])
 }
