@@ -143,7 +143,6 @@ fn test_aces_can_end_a_straight_high() {
 }
 
 #[test]
-#[ignore]
 fn test_aces_can_end_a_straight_low() {
     // aces can start a straight (A 2 3 4 5)
     test(&["4S 5H 4C 8D 4H", "4D AH 3S 2D 5C"], &["4D AH 3S 2D 5C"])
@@ -156,7 +155,6 @@ fn test_straight_cascade() {
 }
 
 #[test]
-#[ignore]
 fn test_straight_scoring() {
     // even though an ace is usually high, a 5-high straight is the lowest-scoring straight
     test(&["2H 3C 4D 5D 6H", "4S AH 3S 2D 5H"], &["2H 3C 4D 5D 6H"])

@@ -98,15 +98,28 @@ pub fn build_poker_hand_handle(hand: &str) -> Result<PokerHandHandle, &'static s
     card_ranks.sort();
     card_ranks.reverse();
     // Check for a straight.
-    if card_ranks[0] == card_ranks[1] + 1
+    if (card_ranks[0] == card_ranks[1] + 1
         && card_ranks[0] == card_ranks[2] + 2
         && card_ranks[0] == card_ranks[3] + 3
-        && card_ranks[0] == card_ranks[4] + 4
+        && card_ranks[0] == card_ranks[4] + 4)
+        || (card_ranks[0] == 14 // Ace-low straight.
+            && card_ranks[1] == 5 
+            && card_ranks[2] == 4 
+            && card_ranks[3] == 3 
+            && card_ranks[4] == 2)
     {
         if hand_rank == PokerHandRank::Flush {
             hand_rank = PokerHandRank::StraightFlush;
         } else {
             hand_rank = PokerHandRank::Straight;
+        }
+        if card_ranks[0] == 14 && card_ranks[1] == 5 {
+            // Re-order the card_ranks to comparison for an Ace-low straight.
+            card_ranks[0] = 5;
+            card_ranks[1] = 4;
+            card_ranks[2] = 3;
+            card_ranks[3] = 2;
+            card_ranks[4] = 14;
         }
     }
 
