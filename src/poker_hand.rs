@@ -20,7 +20,7 @@ pub enum PokerHandRanks {
 /// A poker hand.
 ///
 /// PartialOrd is supported to allow sorting of hands.
-/// A reference to the hand string from the calling environment is stored so that it can
+/// 'hand_handle' is a reference to the hand string from the calling environment so that it can
 /// be returned as a reference to the winning hand(s).
 #[derive(Debug)]
 pub struct PokerHand<'a> {
@@ -35,6 +35,7 @@ pub struct PokerHand<'a> {
 }
 
 impl PokerHand<'_> {
+    // Construct a new PokerHand from the hand string.
     pub fn new(hand: &str) -> Result<PokerHand, PokerHandError> {
         let mut cards: Vec<Card>;
 
@@ -46,6 +47,7 @@ impl PokerHand<'_> {
             None => return Err(PokerHandError::new("Invalid poker hand")),
         }
 
+        // Sort the cards from highest rank to lowest.
         cards.sort();
         cards.reverse();
 
@@ -82,7 +84,7 @@ impl PokerHand<'_> {
             } else {
                 hand_rank = PokerHandRanks::Straight;
             }
-            if cards[0].rank == Ranks::Ace {
+            if cards[0].rank == Ranks::Ace && cards[1].rank == Ranks::Five {
                 // Move the Ace to the end of the hand.
                 let ace = cards.remove(0);
                 cards.push(ace);
@@ -120,6 +122,54 @@ impl PokerHand<'_> {
             cards.swap(0, 3);
             cards.swap(1, 4);
         }
+        // Handle one pair and two pairs
+        else if cards[0].rank == cards[1].rank {
+            if cards[2].rank == cards[3].rank {
+                hand_rank = PokerHandRanks::TwoPair;
+                if cards[2].rank > cards[0].rank {
+                    // Move the second pair to the front.
+                    cards.swap(0, 2);
+                    cards.swap(1, 3);
+                }
+            } else if cards[3].rank == cards[4].rank {
+                hand_rank = PokerHandRanks::TwoPair;
+                // Move the pairs to the front of the hand.
+                if cards[3].rank > cards[0].rank {
+                    cards.swap(0, 3);
+                    cards.swap(1, 4);
+                }
+                cards.swap(2, 4);
+            } else {
+                // Pair is already at the front.
+                hand_rank = PokerHandRanks::Pair;
+            }
+        } else if cards[1].rank == cards[2].rank {
+            if cards[3].rank == cards[4].rank {
+                hand_rank = PokerHandRanks::TwoPair;
+                if cards[3].rank > cards[1].rank {
+                    // Swap the pairs
+                    cards.swap(1, 3);
+                    cards.swap(2, 4);
+                }
+                // Move the pairs to the front
+                cards.swap(0, 2);
+                cards.swap(2, 4);
+            } else {
+                hand_rank = PokerHandRanks::Pair;
+                // Move the pair to the front.
+                cards.swap(0, 2);
+            }
+        } else if cards[2].rank == cards[3].rank {
+            hand_rank = PokerHandRanks::Pair;
+            cards.swap(0, 2);
+            cards.swap(1, 3);
+        } else if cards[3].rank == cards[4].rank {
+            hand_rank = PokerHandRanks::Pair;
+            // Move the pair to the front.
+            cards.swap(2, 4);
+            cards.swap(1, 3);
+            cards.swap(0, 2);
+        }
 
         Ok(PokerHand {
             hand_handle: hand,
@@ -129,31 +179,29 @@ impl PokerHand<'_> {
     }
 
     fn convert_strings_to_card(rank: &str, suit: &str) -> Card {
-        let card_rank: Ranks;
-        let card_suit: Suits;
-        match rank {
-            "2" => card_rank = Ranks::Two,
-            "3" => card_rank = Ranks::Three,
-            "4" => card_rank = Ranks::Four,
-            "5" => card_rank = Ranks::Five,
-            "6" => card_rank = Ranks::Six,
-            "7" => card_rank = Ranks::Seven,
-            "8" => card_rank = Ranks::Eight,
-            "9" => card_rank = Ranks::Nine,
-            "10" => card_rank = Ranks::Ten,
-            "J" => card_rank = Ranks::Jack,
-            "Q" => card_rank = Ranks::Queen,
-            "K" => card_rank = Ranks::King,
-            "A" => card_rank = Ranks::Ace,
+        let card_rank: Ranks = match rank {
+            "2" => Ranks::Two,
+            "3" => Ranks::Three,
+            "4" => Ranks::Four,
+            "5" => Ranks::Five,
+            "6" => Ranks::Six,
+            "7" => Ranks::Seven,
+            "8" => Ranks::Eight,
+            "9" => Ranks::Nine,
+            "10" => Ranks::Ten,
+            "J" => Ranks::Jack,
+            "Q" => Ranks::Queen,
+            "K" => Ranks::King,
+            "A" => Ranks::Ace,
             _ => panic!("Invalid card rank"),
-        }
-        match suit {
-            "H" => card_suit = Suits::Hearts,
-            "S" => card_suit = Suits::Spades,
-            "C" => card_suit = Suits::Clubs,
-            "D" => card_suit = Suits::Diamonds,
+        };
+        let card_suit: Suits = match suit {
+            "H" => Suits::Hearts,
+            "S" => Suits::Spades,
+            "C" => Suits::Clubs,
+            "D" => Suits::Diamonds,
             _ => panic!("Invalid card suit"),
-        }
+        };
         Card::new(card_rank, card_suit)
     }
 
