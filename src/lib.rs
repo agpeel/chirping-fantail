@@ -2,7 +2,7 @@ mod cards;
 mod error;
 mod poker_hand;
 
-use error::PokerHandError;
+// use error::PokerHandError;
 use poker_hand::PokerHand;
 
 /// Given a list of poker hands, return a list of those hands which win.
@@ -39,6 +39,7 @@ pub fn winning_hands<'a>(hands: &[&'a str]) -> Option<Vec<&'a str>> {
                 }
             }
             // Return an immutable vector of references to the winning hands.
+            // TODO: There must be a way to do this without cloning.
             let return_val = top_hands.clone();
             Some(return_val)
         }

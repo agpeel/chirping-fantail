@@ -210,7 +210,7 @@ impl PokerHand<'_> {
         // NOTE: even though the cards are sorted, we still need to check every pair
         // as the cards are only sorted by rank, so duplicates may not be adjacent.
         // For example, "4C 4S 4C 3S 2H".
-        for i in 0..cards.len() {
+        for i in 0..(cards.len() - 1) {
             for j in i + 1..cards.len() {
                 if cards[i] == cards[j] {
                     return true;
@@ -220,6 +220,7 @@ impl PokerHand<'_> {
         false
     }
 
+    /// Parse the hand string into a vector of cards.
     fn parse_hand_str(hand: &str) -> Option<Vec<Card>> {
         let mut cards: Vec<Card> = Vec::with_capacity(5);
 
