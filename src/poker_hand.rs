@@ -59,15 +59,35 @@ impl PokerHand<'_> {
         // The hand is already sorted into the correct order for a HighCard hand.
         let mut hand_rank: PokerHandRanks = PokerHandRanks::HighCard;
 
-        // Check for a flush
+        PokerHand::check_flush(&cards, &mut hand_rank);
+        if !PokerHand::check_straight(&mut cards, &mut hand_rank) {
+            if !PokerHand::check_four_of_a_kind(&mut cards, &mut hand_rank) {
+                if !PokerHand::check_three_and_full_house(&mut cards, &mut hand_rank) {
+                    PokerHand::check_one_and_two_pairs(&mut cards, &mut hand_rank);
+                }
+            }
+        }
+
+        Ok(PokerHand {
+            hand_handle: hand,
+            hand_rank,
+            cards,
+        })
+    }
+
+    fn check_flush(cards: &[Card], hand_rank: &mut PokerHandRanks) -> bool {
         if cards[0].suit == cards[1].suit
             && cards[0].suit == cards[2].suit
             && cards[0].suit == cards[3].suit
             && cards[0].suit == cards[4].suit
         {
-            hand_rank = PokerHandRanks::Flush;
+            *hand_rank = PokerHandRanks::Flush;
+            return true;
         }
-        // Check for a straight.
+        false
+    }
+
+    fn check_straight(cards: &mut Vec<Card>, hand_rank: &mut PokerHandRanks) -> bool {
         if (cards[0].rank as isize == cards[1].rank as isize + 1
             && cards[0].rank as isize == cards[2].rank as isize + 2
             && cards[0].rank as isize == cards[3].rank as isize + 3
@@ -79,103 +99,102 @@ impl PokerHand<'_> {
                 && cards[3].rank == Ranks::Three
                 && cards[4].rank == Ranks::Two)
         {
-            if hand_rank == PokerHandRanks::Flush {
-                hand_rank = PokerHandRanks::StraightFlush;
+            if *hand_rank == PokerHandRanks::Flush {
+                *hand_rank = PokerHandRanks::StraightFlush;
             } else {
-                hand_rank = PokerHandRanks::Straight;
+                *hand_rank = PokerHandRanks::Straight;
             }
             if cards[0].rank == Ranks::Ace && cards[1].rank == Ranks::Five {
                 // Move the Ace to the end of the hand.
                 let ace = cards.remove(0);
                 cards.push(ace);
             }
+            return true;
         }
-        // Check four of a kind.
-        else if cards[1].rank == cards[2].rank
+        false
+    }
+
+    fn check_four_of_a_kind(cards: &mut Vec<Card>, hand_rank: &mut PokerHandRanks) -> bool {
+        if cards[1].rank == cards[2].rank
             && cards[1].rank == cards[3].rank
             && (cards[1].rank == cards[0].rank || cards[1].rank == cards[4].rank)
         {
-            hand_rank = PokerHandRanks::FourOfAKind;
+            *hand_rank = PokerHandRanks::FourOfAKind;
             // Move the four of a kind to the front of the hand.
             if cards[4].rank == cards[1].rank {
                 cards.swap(0, 4);
             }
+            return true;
         }
-        // Check three of a kind and full house.
-        else if cards[0].rank == cards[1].rank && cards[0].rank == cards[2].rank {
+        false
+    }
+
+    fn check_three_and_full_house(cards: &mut Vec<Card>, hand_rank: &mut PokerHandRanks) -> bool {
+        if cards[0].rank == cards[1].rank && cards[0].rank == cards[2].rank {
             if cards[3].rank == cards[4].rank {
-                hand_rank = PokerHandRanks::FullHouse;
+                *hand_rank = PokerHandRanks::FullHouse;
             } else {
-                hand_rank = PokerHandRanks::ThreeOfAKind;
+                *hand_rank = PokerHandRanks::ThreeOfAKind;
             }
+            return true;
         } else if cards[1].rank == cards[2].rank && cards[1].rank == cards[3].rank {
-            hand_rank = PokerHandRanks::ThreeOfAKind;
+            *hand_rank = PokerHandRanks::ThreeOfAKind;
             // Move the three of a kind to the front of the hand.
             cards.swap(0, 3);
+            return true;
         } else if cards[2].rank == cards[3].rank && cards[2].rank == cards[4].rank {
             if cards[0].rank == cards[1].rank {
-                hand_rank = PokerHandRanks::FullHouse;
+                *hand_rank = PokerHandRanks::FullHouse;
             } else {
-                hand_rank = PokerHandRanks::ThreeOfAKind;
+                *hand_rank = PokerHandRanks::ThreeOfAKind;
             }
             // Move the three of a kind to the front of the hand.
             cards.swap(0, 3);
             cards.swap(1, 4);
+            return true;
         }
-        // Handle one pair and two pairs
-        else if cards[0].rank == cards[1].rank {
+        false
+    }
+
+    fn check_one_and_two_pairs(cards: &mut Vec<Card>, hand_rank: &mut PokerHandRanks) -> bool {
+        if cards[0].rank == cards[1].rank {
             if cards[2].rank == cards[3].rank {
-                hand_rank = PokerHandRanks::TwoPair;
-                if cards[2].rank > cards[0].rank {
-                    // Move the second pair to the front.
-                    cards.swap(0, 2);
-                    cards.swap(1, 3);
-                }
+                *hand_rank = PokerHandRanks::TwoPair;
             } else if cards[3].rank == cards[4].rank {
-                hand_rank = PokerHandRanks::TwoPair;
+                *hand_rank = PokerHandRanks::TwoPair;
                 // Move the pairs to the front of the hand.
-                if cards[3].rank > cards[0].rank {
-                    cards.swap(0, 3);
-                    cards.swap(1, 4);
-                }
                 cards.swap(2, 4);
             } else {
                 // Pair is already at the front.
-                hand_rank = PokerHandRanks::Pair;
+                *hand_rank = PokerHandRanks::Pair;
             }
+            return true;
         } else if cards[1].rank == cards[2].rank {
             if cards[3].rank == cards[4].rank {
-                hand_rank = PokerHandRanks::TwoPair;
-                if cards[3].rank > cards[1].rank {
-                    // Swap the pairs
-                    cards.swap(1, 3);
-                    cards.swap(2, 4);
-                }
+                *hand_rank = PokerHandRanks::TwoPair;
                 // Move the pairs to the front
                 cards.swap(0, 2);
                 cards.swap(2, 4);
             } else {
-                hand_rank = PokerHandRanks::Pair;
+                *hand_rank = PokerHandRanks::Pair;
                 // Move the pair to the front.
                 cards.swap(0, 2);
             }
+            return true;
         } else if cards[2].rank == cards[3].rank {
-            hand_rank = PokerHandRanks::Pair;
+            *hand_rank = PokerHandRanks::Pair;
             cards.swap(0, 2);
             cards.swap(1, 3);
+            return true;
         } else if cards[3].rank == cards[4].rank {
-            hand_rank = PokerHandRanks::Pair;
+            *hand_rank = PokerHandRanks::Pair;
             // Move the pair to the front.
             cards.swap(2, 4);
             cards.swap(1, 3);
             cards.swap(0, 2);
+            return true;
         }
-
-        Ok(PokerHand {
-            hand_handle: hand,
-            hand_rank,
-            cards,
-        })
+        false
     }
 
     fn convert_strings_to_card(rank: &str, suit: &str) -> Card {
@@ -382,9 +401,126 @@ mod tests {
 
     #[test]
     fn test_duplicate_cards() {
-        let card1 = PokerHand::parse_hand_str("9H AS JC 10D 5H").unwrap();
-        assert!(!PokerHand::check_for_duplicate_cards(&card1));
-        let card2 = PokerHand::parse_hand_str("9H AS JC JC 5H").unwrap();
-        assert!(PokerHand::check_for_duplicate_cards(&card2));
+        let hand1 = PokerHand::parse_hand_str("9H AS JC 10D 5H").unwrap();
+        assert!(!PokerHand::check_for_duplicate_cards(&hand1));
+        let hand2 = PokerHand::parse_hand_str("9H AS JC JC 5H").unwrap();
+        assert!(PokerHand::check_for_duplicate_cards(&hand2));
+    }
+
+    #[test]
+    fn test_check_flush() {
+        let cards1 = PokerHand::parse_hand_str("9H AS JC 7C 5H").unwrap();
+        let mut hand_rank = PokerHandRanks::HighCard;
+        assert!(!PokerHand::check_flush(&cards1, &mut hand_rank));
+        assert!(hand_rank == PokerHandRanks::HighCard);
+        let cards2 = PokerHand::parse_hand_str("9H AH JH 7H 5H").unwrap();
+        assert!(PokerHand::check_flush(&cards2, &mut hand_rank));
+        assert!(hand_rank == PokerHandRanks::Flush);
+    }
+
+    #[test]
+    fn test_check_straight() {
+        let mut cards = PokerHand::parse_hand_str("9H AS JC 7C 5H").unwrap();
+        let mut hand_rank = PokerHandRanks::HighCard;
+        // Not a straight
+        assert!(!PokerHand::check_straight(&mut cards, &mut hand_rank));
+        assert!(hand_rank == PokerHandRanks::HighCard);
+        cards = PokerHand::parse_hand_str("9H 8S 7C 6C 5H").unwrap();
+        // A straight
+        assert!(PokerHand::check_straight(&mut cards, &mut hand_rank));
+        assert!(hand_rank == PokerHandRanks::Straight);
+        cards = PokerHand::parse_hand_str("9H 8H 7H 6H 5H").unwrap();
+        hand_rank = PokerHandRanks::Flush;
+        // A straight flush
+        assert!(PokerHand::check_straight(&mut cards, &mut hand_rank));
+        assert!(hand_rank == PokerHandRanks::StraightFlush);
+        // An ace-low straight
+        cards = PokerHand::parse_hand_str("AH 5H 4H 3H 2H").unwrap();
+        hand_rank = PokerHandRanks::Flush;
+        assert!(PokerHand::check_straight(&mut cards, &mut hand_rank));
+        assert!(hand_rank == PokerHandRanks::StraightFlush);
+        assert!(cards[4].rank == Ranks::Ace);
+        assert!(cards[0].rank == Ranks::Five);
+    }
+
+    #[test]
+    fn test_check_four_of_a_kind() {
+        let mut cards = PokerHand::parse_hand_str("AH JS 9C 7C 5H").unwrap();
+        let mut hand_rank = PokerHandRanks::HighCard;
+        // Not a four of a kind
+        assert!(!PokerHand::check_four_of_a_kind(&mut cards, &mut hand_rank));
+        assert!(hand_rank == PokerHandRanks::HighCard);
+        assert!(cards[2].rank == Ranks::Nine);
+        // Four at start of the hand.
+        cards = PokerHand::parse_hand_str("9H 9S 9C 9D 5H").unwrap();
+        assert!(PokerHand::check_four_of_a_kind(&mut cards, &mut hand_rank));
+        assert!(hand_rank == PokerHandRanks::FourOfAKind);
+        // Four at end of the hand.
+        cards = PokerHand::parse_hand_str("JD 9H 9S 9C 9D").unwrap();
+        hand_rank = PokerHandRanks::HighCard;
+        assert!(PokerHand::check_four_of_a_kind(&mut cards, &mut hand_rank));
+        assert!(hand_rank == PokerHandRanks::FourOfAKind);
+        assert!(cards[0].rank == Ranks::Nine);
+        assert!(cards[4].rank == Ranks::Jack);
+    }
+
+    #[test]
+    fn test_check_three_and_full_house() {
+        let mut cards = PokerHand::parse_hand_str("AH QS JC 7C 5H").unwrap();
+        let mut hand_rank = PokerHandRanks::HighCard;
+        // Not a three of a kind
+        assert!(!PokerHand::check_three_and_full_house(
+            &mut cards,
+            &mut hand_rank
+        ));
+        assert!(hand_rank == PokerHandRanks::HighCard);
+        // Three of a kind.
+        cards = PokerHand::parse_hand_str("JD 9H 9S 9C 5D").unwrap();
+        assert!(PokerHand::check_three_and_full_house(
+            &mut cards,
+            &mut hand_rank
+        ));
+        assert!(hand_rank == PokerHandRanks::ThreeOfAKind);
+        assert!(cards[0].rank == Ranks::Nine);
+        assert!(cards[3].rank == Ranks::Jack);
+        // Full house
+        cards = PokerHand::parse_hand_str("7D 7H 9S 9C 9D").unwrap();
+        assert!(PokerHand::check_three_and_full_house(
+            &mut cards,
+            &mut hand_rank
+        ));
+        assert!(hand_rank == PokerHandRanks::FullHouse);
+        assert!(cards[0].rank == Ranks::Nine);
+        assert!(cards[3].rank == Ranks::Seven);
+    }
+
+    #[test]
+    fn test_check_one_and_two_pairs() {
+        let mut cards = PokerHand::parse_hand_str("AH QS JC 7C 5H").unwrap();
+        let mut hand_rank = PokerHandRanks::HighCard;
+        // No pairs
+        assert!(!PokerHand::check_one_and_two_pairs(
+            &mut cards,
+            &mut hand_rank
+        ));
+        assert!(hand_rank == PokerHandRanks::HighCard);
+        // One pair
+        cards = PokerHand::parse_hand_str("AH QS 7C 7C 5H").unwrap();
+        assert!(PokerHand::check_one_and_two_pairs(
+            &mut cards,
+            &mut hand_rank
+        ));
+        assert!(hand_rank == PokerHandRanks::Pair);
+        assert!(cards[0].rank == Ranks::Seven);
+        // Two pairs
+        cards = PokerHand::parse_hand_str("QH 9H 9S 7C 7C").unwrap();
+        assert!(PokerHand::check_one_and_two_pairs(
+            &mut cards,
+            &mut hand_rank
+        ));
+        assert!(hand_rank == PokerHandRanks::TwoPair);
+        assert!(cards[0].rank == Ranks::Nine);
+        assert!(cards[2].rank == Ranks::Seven);
+        assert!(cards[4].rank == Ranks::Queen);
     }
 }
