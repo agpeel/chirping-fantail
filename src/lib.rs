@@ -2,7 +2,7 @@ mod cards;
 mod poker_hand;
 
 use poker_hand::build_poker_hand_handle;
-use poker_hand::PokerHandHandle;
+use poker_hand::PokerHand;
 
 /// Given a list of poker hands, return a list of those hands which win.
 ///
@@ -10,7 +10,7 @@ use poker_hand::PokerHandHandle;
 /// the winning hand(s) as were passed in, not reconstructed strings which happen to be equal.
 pub fn winning_hands<'a>(hands: &[&'a str]) -> Option<Vec<&'a str>> {
     // Record the hand handles in a mutable vector that will be sorted.
-    let mut hand_handles: Vec<PokerHandHandle> = Vec::with_capacity(hands.len());
+    let mut hand_handles: Vec<PokerHand> = Vec::with_capacity(hands.len());
     for hand in hands {
         let hand_handle = match build_poker_hand_handle(hand) {
             Ok(hand_handle) => hand_handle,
