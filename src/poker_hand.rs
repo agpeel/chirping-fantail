@@ -1,6 +1,5 @@
 use crate::cards::{Card, Ranks, Suits};
 use crate::error::PokerHandError;
-use core::num::dec2flt::parse;
 use regex::Regex;
 use std::cmp::Ordering;
 
@@ -46,7 +45,9 @@ impl PokerHand<'_> {
             }
             None => return Err(PokerHandError::new("Invalid poker hand")),
         }
-        // TODO: Check for the same card in the hard.
+        if PokerHand::check_for_duplicate_cards(&cards) {
+            return Err(PokerHandError::new("Duplicate cards in hand"));
+        }
 
         // Classify the hand.
         let hand_rank: PokerHandRanks = PokerHandRanks::HighCard;
@@ -86,6 +87,18 @@ impl PokerHand<'_> {
             _ => panic!("Invalid card suit"),
         }
         Card::new(card_rank, card_suit)
+    }
+
+    /// Check for duplicate cards in a hand.
+    fn check_for_duplicate_cards(cards: &Vec<Card>) -> bool {
+        for i in 0..cards.len() {
+            for j in i + 1..cards.len() {
+                if cards[i] == cards[j] {
+                    return true;
+                }
+            }
+        }
+        false
     }
 
     fn parse_hand_str(hand: &str) -> Option<Vec<Card>> {
@@ -245,5 +258,13 @@ mod tests {
         let hand_str = "9H AS JC 10D 5H QS";
         let result = PokerHand::parse_hand_str(hand_str);
         assert_eq!(result, None);
+    }
+
+    #[test]
+    fn test_duplicate_cards() {
+        let card1 = PokerHand::parse_hand_str("9H AS JC 10D 5H").unwrap();
+        assert!(!PokerHand::check_for_duplicate_cards(&card1));
+        let card2 = PokerHand::parse_hand_str("9H AS JC JC 5H").unwrap();
+        assert!(PokerHand::check_for_duplicate_cards(&card2));
     }
 }
