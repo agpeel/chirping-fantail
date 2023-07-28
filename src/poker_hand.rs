@@ -67,16 +67,16 @@ impl PokerHand<'_> {
         }
 
         // Check for a straight.
-        if cards[0].rank as isize == cards[1].rank as isize + 1
+        if (cards[0].rank as isize == cards[1].rank as isize + 1
             && cards[0].rank as isize == cards[2].rank as isize + 2
             && cards[0].rank as isize == cards[3].rank as isize + 3
-            && cards[0].rank as isize == cards[4].rank as isize + 4
+            && cards[0].rank as isize == cards[4].rank as isize + 4)
             // Check for an Ace-low straight.
-            || cards[0].rank == Ranks::Ace
+            || (cards[0].rank == Ranks::Ace
                 && cards[1].rank == Ranks::Five
                 && cards[2].rank == Ranks::Four
                 && cards[3].rank == Ranks::Three
-                && cards[4].rank == Ranks::Two
+                && cards[4].rank == Ranks::Two)
         {
             if hand_rank == PokerHandRanks::Flush {
                 hand_rank = PokerHandRanks::StraightFlush;
@@ -87,6 +87,17 @@ impl PokerHand<'_> {
                 // Move the Ace to the end of the hand.
                 let ace = cards.remove(0);
                 cards.push(ace);
+            }
+        }
+        // Check four of a kind.
+        else if cards[1].rank == cards[2].rank
+            && cards[1].rank == cards[3].rank
+            && (cards[1].rank == cards[0].rank || cards[1].rank == cards[4].rank)
+        {
+            hand_rank = PokerHandRanks::FourOfAKind;
+            // Move the four of a kind to the front of the hand.
+            if cards[4].rank == cards[1].rank {
+                cards.swap(0, 4);
             }
         }
 
