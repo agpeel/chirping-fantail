@@ -45,6 +45,10 @@ impl PokerHand<'_> {
             }
             None => return Err(PokerHandError::new("Invalid poker hand")),
         }
+
+        cards.sort();
+        cards.reverse();
+
         if PokerHand::check_for_duplicate_cards(&cards) {
             return Err(PokerHandError::new("Duplicate cards in hand"));
         }
