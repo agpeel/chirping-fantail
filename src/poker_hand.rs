@@ -95,6 +95,9 @@ impl PokerHand<'_> {
 
     /// Check for duplicate cards in a hand.
     fn check_for_duplicate_cards(cards: &Vec<Card>) -> bool {
+        // NOTE: even though the cards are sorted, we still need to check every pair
+        // as the cards are only sorted by rank, so duplicates may not be adjacent.
+        // For example, "4C 4S 4C 3S 2H".
         for i in 0..cards.len() {
             for j in i + 1..cards.len() {
                 if cards[i] == cards[j] {
