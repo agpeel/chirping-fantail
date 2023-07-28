@@ -54,8 +54,41 @@ impl PokerHand<'_> {
         }
 
         // Classify the hand.
-        let hand_rank: PokerHandRanks = PokerHandRanks::HighCard;
-        todo!();
+        // The hand is sorted into the correct order for a HighCard hand.
+        let mut hand_rank: PokerHandRanks = PokerHandRanks::HighCard;
+
+        // Check for a flush
+        if cards[0].suit == cards[1].suit
+            && cards[0].suit == cards[2].suit
+            && cards[0].suit == cards[3].suit
+            && cards[0].suit == cards[4].suit
+        {
+            hand_rank = PokerHandRanks::Flush;
+        }
+
+        // Check for a straight.
+        if cards[0].rank as isize == cards[1].rank as isize + 1
+            && cards[0].rank as isize == cards[2].rank as isize + 2
+            && cards[0].rank as isize == cards[3].rank as isize + 3
+            && cards[0].rank as isize == cards[4].rank as isize + 4
+            // Check for an Ace-low straight.
+            || cards[0].rank == Ranks::Ace
+                && cards[1].rank == Ranks::Five
+                && cards[2].rank == Ranks::Four
+                && cards[3].rank == Ranks::Three
+                && cards[4].rank == Ranks::Two
+        {
+            if hand_rank == PokerHandRanks::Flush {
+                hand_rank = PokerHandRanks::StraightFlush;
+            } else {
+                hand_rank = PokerHandRanks::Straight;
+            }
+            if cards[0].rank == Ranks::Ace {
+                // Move the Ace to the end of the hand.
+                let ace = cards.remove(0);
+                cards.push(ace);
+            }
+        }
 
         Ok(PokerHand {
             hand_handle: hand,
