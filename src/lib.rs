@@ -1,7 +1,8 @@
 mod cards;
+mod error;
 mod poker_hand;
 
-use poker_hand::build_poker_hand_handle;
+use error::PokerHandError;
 use poker_hand::PokerHand;
 
 /// Given a list of poker hands, return a list of those hands which win.
@@ -12,9 +13,11 @@ pub fn winning_hands<'a>(hands: &[&'a str]) -> Option<Vec<&'a str>> {
     // Record the hand handles in a mutable vector that will be sorted.
     let mut hand_handles: Vec<PokerHand> = Vec::with_capacity(hands.len());
     for hand in hands {
-        let hand_handle = match build_poker_hand_handle(hand) {
+        let hand_handle = match PokerHand::new(hand) {
             Ok(hand_handle) => hand_handle,
-            // Ignore invalid hands.
+            // Ignore invalid hands and process the rest of the list.
+            // TODO:  Only catch error::PokerHandError and propogate other errors.
+            //        I tried to do that but could not get it to work.
             Err(_) => continue,
         };
         hand_handles.push(hand_handle);

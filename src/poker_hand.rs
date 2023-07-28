@@ -1,4 +1,5 @@
 use crate::cards::{Card, Ranks, Suits};
+use crate::error::PokerHandError;
 use std::cmp::Ordering;
 
 /// Poker hand types, in the order of their relative value.
@@ -32,21 +33,23 @@ pub struct PokerHand<'a> {
     pub cards: Vec<Card>,
 }
 
-pub fn build_poker_hand_handle(hand: &str) -> Result<PokerHand, &'static str> {
-    let mut cards: Vec<Card> = Vec::with_capacity(5);
+impl PokerHand<'_> {
+    pub fn new(hand: &str) -> Result<PokerHand, PokerHandError> {
+        let mut cards: Vec<Card> = Vec::with_capacity(5);
 
-    // Parse the hand string.
-    todo!();
+        // Parse the hand string.
+        todo!();
 
-    // Classify the hand.
-    let hand_rank: PokerHandRanks = PokerHandRanks::HighCard;
-    todo!();
+        // Classify the hand.
+        let hand_rank: PokerHandRanks = PokerHandRanks::HighCard;
+        todo!();
 
-    Ok(PokerHand {
-        hand_handle: hand,
-        hand_rank,
-        cards,
-    })
+        Ok(PokerHand {
+            hand_handle: hand,
+            hand_rank,
+            cards,
+        })
+    }
 }
 
 impl PartialEq for PokerHand<'_> {
