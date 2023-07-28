@@ -1,8 +1,9 @@
+/// Poker hands, and methods to compare them.
 use std::cmp::Ordering;
 
-#[derive(Debug, Copy, Clone, PartialEq)]
-pub enum PokerHandRank {
-    HighCard,
+#[derive(Debug, Eq, PartialEq, Ord, PartialOrd)]
+pub enum PokerHandRanks {
+    HighCard = 1,
     Pair,
     TwoPair,
     ThreeOfAKind,
@@ -13,27 +14,11 @@ pub enum PokerHandRank {
     StraightFlush,
 }
 
-impl From<PokerHandRank> for u8 {
-    fn from(rank: PokerHandRank) -> Self {
-        match rank {
-            PokerHandRank::HighCard => 1,
-            PokerHandRank::Pair => 2,
-            PokerHandRank::TwoPair => 3,
-            PokerHandRank::ThreeOfAKind => 4,
-            PokerHandRank::Straight => 5,
-            PokerHandRank::Flush => 6,
-            PokerHandRank::FullHouse => 7,
-            PokerHandRank::FourOfAKind => 8,
-            PokerHandRank::StraightFlush => 9,
-        }
-    }
-}
-
 // Record a reference to the input string slice and derived information about the hand.
 #[derive(Debug)]
 pub struct PokerHandHandle<'a> {
     pub hand_handle: &'a str,
-    pub hand_rank: PokerHandRank,
+    pub hand_rank: PokerHandRanks,
     // A vector of the card ranks (the number, not the suit) in the hand, sorted in "scoring order".
     // Scoring order means the order in which the cards are compared to determine the winner.
     // For example "9H 2S 3C 3D 5H" would be [3, 3, 9, 5, 2].
@@ -87,12 +72,12 @@ pub fn build_poker_hand_handle(hand: &str) -> Result<PokerHandHandle, &'static s
     }
 
     // Classify the hand.
-    let mut hand_rank: PokerHandRank = PokerHandRank::HighCard;
+    let mut hand_rank: PokerHandRanks = PokerHandRanks::HighCard;
     // Is it a flush?
     // This changes card_suits, which is OK as it is no longer used.
     card_suits.dedup();
     if card_suits.len() == 1 {
-        hand_rank = PokerHandRank::Flush;
+        hand_rank = PokerHandRanks::Flush;
     }
     // Sort the card ranks from highest to lowest.
     card_ranks.sort();
@@ -108,10 +93,10 @@ pub fn build_poker_hand_handle(hand: &str) -> Result<PokerHandHandle, &'static s
             && card_ranks[3] == 3 
             && card_ranks[4] == 2)
     {
-        if hand_rank == PokerHandRank::Flush {
-            hand_rank = PokerHandRank::StraightFlush;
+        if hand_rank == PokerHandRanks::Flush {
+            hand_rank = PokerHandRanks::StraightFlush;
         } else {
-            hand_rank = PokerHandRank::Straight;
+            hand_rank = PokerHandRanks::Straight;
         }
         if card_ranks[0] == 14 && card_ranks[1] == 5 {
             // Re-order the card_ranks to comparison for an Ace-low straight.
@@ -124,9 +109,9 @@ pub fn build_poker_hand_handle(hand: &str) -> Result<PokerHandHandle, &'static s
     } 
     // Check for four of a kind.
     else if card_ranks[0] == card_ranks[1] && card_ranks[0] == card_ranks[2] && card_ranks[0] == card_ranks[3] {
-        hand_rank = PokerHandRank::FourOfAKind;
+        hand_rank = PokerHandRanks::FourOfAKind;
     } else if card_ranks[1] == card_ranks[2] && card_ranks[1] == card_ranks[3] && card_ranks[1] == card_ranks[4] {
-        hand_rank = PokerHandRank::FourOfAKind;
+        hand_rank = PokerHandRanks::FourOfAKind;
         // Re-order the card_ranks to put the four of a kind first.
         card_ranks[4] = card_ranks[0];
         card_ranks[0] = card_ranks[1];
@@ -134,19 +119,19 @@ pub fn build_poker_hand_handle(hand: &str) -> Result<PokerHandHandle, &'static s
     // Check for three of a kind and full house.
     else if card_ranks[0] == card_ranks[1] && card_ranks[0] == card_ranks[2] {
         if card_ranks[3] == card_ranks[4] {
-            hand_rank = PokerHandRank::FullHouse;
+            hand_rank = PokerHandRanks::FullHouse;
         } else {
-            hand_rank = PokerHandRank::ThreeOfAKind;
+            hand_rank = PokerHandRanks::ThreeOfAKind;
         }
     } else if card_ranks[1] == card_ranks[2] && card_ranks[1] == card_ranks[3] {
-        hand_rank = PokerHandRank::ThreeOfAKind;
+        hand_rank = PokerHandRanks::ThreeOfAKind;
         card_ranks[3] = card_ranks[0];
         card_ranks[0] = card_ranks[1];
     } else if card_ranks[2] == card_ranks[3] && card_ranks[2] == card_ranks[4] {
         if card_ranks[0] == card_ranks[1] {
-            hand_rank = PokerHandRank::FullHouse;
+            hand_rank = PokerHandRanks::FullHouse;
         } else {
-            hand_rank = PokerHandRank::ThreeOfAKind;
+            hand_rank = PokerHandRanks::ThreeOfAKind;
         }
         card_ranks[4] = card_ranks[1];
         card_ranks[3] = card_ranks[0];
@@ -156,33 +141,33 @@ pub fn build_poker_hand_handle(hand: &str) -> Result<PokerHandHandle, &'static s
     // Check for pairs
     else if card_ranks[0] == card_ranks[1] {
         if card_ranks[2] == card_ranks[3] {
-            hand_rank = PokerHandRank::TwoPair;
+            hand_rank = PokerHandRanks::TwoPair;
         } else if card_ranks[3] == card_ranks[4] {
-            hand_rank = PokerHandRank::TwoPair;
+            hand_rank = PokerHandRanks::TwoPair;
             card_ranks[4] = card_ranks[2];
             card_ranks[2] = card_ranks[3];
         } else {
-            hand_rank = PokerHandRank::Pair;
+            hand_rank = PokerHandRanks::Pair;
         }
     } else if card_ranks[1] == card_ranks[2] {
         if card_ranks[3] == card_ranks[4] {
-            hand_rank = PokerHandRank::TwoPair;
+            hand_rank = PokerHandRanks::TwoPair;
             card_ranks[4] = card_ranks[0];
             card_ranks[2] = card_ranks[3];
             card_ranks[0] = card_ranks[1];
         } else {
-            hand_rank = PokerHandRank::Pair;
+            hand_rank = PokerHandRanks::Pair;
             card_ranks[2] = card_ranks[0];
             card_ranks[0] = card_ranks[1];
         }
     } else if card_ranks[2] == card_ranks[3] {
-        hand_rank = PokerHandRank::Pair;
+        hand_rank = PokerHandRanks::Pair;
         card_ranks[3] = card_ranks[1];
         card_ranks[1] = card_ranks[2];
         card_ranks[2] = card_ranks[0];
         card_ranks[0] = card_ranks[1];
     } else if card_ranks[3] == card_ranks[4] {
-        hand_rank = PokerHandRank::Pair;
+        hand_rank = PokerHandRanks::Pair;
         card_ranks[4] = card_ranks[2];
         card_ranks[2] = card_ranks[0];
         card_ranks[0] = card_ranks[3];
@@ -205,9 +190,9 @@ impl PartialEq for PokerHandHandle<'_> {
 
 impl PartialOrd for PokerHandHandle<'_> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        if u8::from(self.hand_rank) < u8::from(other.hand_rank) {
+        if self.hand_rank < other.hand_rank {
             Some(Ordering::Less)
-        } else if u8::from(self.hand_rank) > u8::from(other.hand_rank) {
+        } else if self.hand_rank > other.hand_rank {
             Some(Ordering::Greater)
         } else {
             // Compare the card ranks.
@@ -220,5 +205,16 @@ impl PartialOrd for PokerHandHandle<'_> {
             }
             Some(Ordering::Equal)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_poker_hand_ranks() {
+        assert!(PokerHandRanks::FullHouse == PokerHandRanks::FullHouse);
+        assert!(PokerHandRanks::HighCard < PokerHandRanks::Pair);
     }
 }
