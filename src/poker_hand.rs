@@ -54,7 +54,7 @@ impl PokerHand<'_> {
         }
 
         // Classify the hand.
-        // The hand is sorted into the correct order for a HighCard hand.
+        // The hand is already sorted into the correct order for a HighCard hand.
         let mut hand_rank: PokerHandRanks = PokerHandRanks::HighCard;
 
         // Check for a flush
@@ -65,7 +65,6 @@ impl PokerHand<'_> {
         {
             hand_rank = PokerHandRanks::Flush;
         }
-
         // Check for a straight.
         if (cards[0].rank as isize == cards[1].rank as isize + 1
             && cards[0].rank as isize == cards[2].rank as isize + 2
@@ -99,6 +98,27 @@ impl PokerHand<'_> {
             if cards[4].rank == cards[1].rank {
                 cards.swap(0, 4);
             }
+        }
+        // Check three of a kind and full house.
+        else if cards[0].rank == cards[1].rank && cards[0].rank == cards[2].rank {
+            if cards[3].rank == cards[4].rank {
+                hand_rank = PokerHandRanks::FullHouse;
+            } else {
+                hand_rank = PokerHandRanks::ThreeOfAKind;
+            }
+        } else if cards[1].rank == cards[2].rank && cards[1].rank == cards[3].rank {
+            hand_rank = PokerHandRanks::ThreeOfAKind;
+            // Move the three of a kind to the front of the hand.
+            cards.swap(0, 3);
+        } else if cards[2].rank == cards[3].rank && cards[2].rank == cards[4].rank {
+            if cards[0].rank == cards[1].rank {
+                hand_rank = PokerHandRanks::FullHouse;
+            } else {
+                hand_rank = PokerHandRanks::ThreeOfAKind;
+            }
+            // Move the three of a kind to the front of the hand.
+            cards.swap(0, 3);
+            cards.swap(1, 4);
         }
 
         Ok(PokerHand {
